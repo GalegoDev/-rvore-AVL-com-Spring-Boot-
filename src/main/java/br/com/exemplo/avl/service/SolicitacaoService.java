@@ -2,6 +2,8 @@ package br.com.exemplo.avl.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import br.com.exemplo.avl.dto.ApiResponse;
+import br.com.exemplo.avl.dto.SolicitacaoRequest;
 import br.com.exemplo.avl.model.Solicitacao;
 import br.com.exemplo.avl.repository.SolicitacaoRepository;
 
@@ -13,8 +15,8 @@ public class SolicitacaoService {
         this.repository = repository;
     }
 
-    public void cadastrar(int numero, String solicitacao,String  descricao) {
-        repository.inserir(new Solicitacao(numero,solicitacao ,descricao));
+    public void cadastrar(int numero, String solicitante, String descricao) {
+        repository.inserir(new Solicitacao(numero, solicitante, descricao));
     }
 
     public Solicitacao buscar(int numero) {
@@ -31,5 +33,24 @@ public class SolicitacaoService {
 
     public String exibirArvore() {
         return repository.exibirArvore();
+    }
+
+    // Tarefas 8 e 9: valida os dados e pede a alteração ao repositório
+    public ApiResponse alterarSolicitacao(int numero, SolicitacaoRequest request) {
+        if (request.getSolicitante() == null || request.getSolicitante().trim().isEmpty()) {
+            return new ApiResponse(false, "Informe o nome do solicitante.");
+        }
+
+        if (request.getDescricao() == null || request.getDescricao().trim().isEmpty()) {
+            return new ApiResponse(false, "Informe a descrição da solicitação.");
+        }
+
+        boolean alterado = repository.alterar(numero, request.getSolicitante().trim(), request.getDescricao().trim());
+
+        if (!alterado) {
+            return new ApiResponse(false, "Solicitação não encontrada.");
+        }
+
+        return new ApiResponse(true, "Solicitação alterada com sucesso.");
     }
 }
